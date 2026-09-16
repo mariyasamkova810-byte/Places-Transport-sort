@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#091b3a">
+  <title>Word Sort: Town & Transport</title>
+  <meta name="description" content="A two-level English vocabulary sorting game for A1+ learners.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23091b3a'/%3E%3Cpath d='M12 44h40M18 44V28h28v16M24 28V18h16v10M28 44V34h8v10' fill='none' stroke='%23f8d757' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <style>
+    :root{--ink:#10213f;--navy:#091b3a;--cream:#fffaf0;--yellow:#f8d757;--coral:#ff7a66;--aqua:#70ded2;--white:#fff;--muted:#64728c;--shadow:0 16px 50px rgba(9,27,58,.16)}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:ui-rounded,"Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:radial-gradient(circle at 8% 8%,rgba(112,222,210,.45),transparent 25%),radial-gradient(circle at 90% 85%,rgba(255,122,102,.28),transparent 28%),var(--cream);overflow-x:hidden}
+    button{font:inherit}
+    .shell{width:min(1180px,calc(100% - 32px));margin:auto;padding:24px 0 40px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:-.03em;font-size:clamp(1.25rem,3vw,2rem)}
+    .brand-mark{width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:var(--navy);color:var(--yellow);box-shadow:0 8px 0 rgba(9,27,58,.12);transform:rotate(-3deg)}
+    .level-switch{display:flex;background:#fff;border:2px solid var(--navy);border-radius:999px;padding:4px;box-shadow:0 6px 0 rgba(9,27,58,.1)}
+    .level-btn{border:0;background:transparent;color:var(--muted);padding:9px 16px;border-radius:999px;font-weight:900;cursor:pointer}
+    .level-btn.active{background:var(--navy);color:#fff}
+    .game{background:rgba(255,255,255,.78);border:2px solid var(--navy);border-radius:32px;box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(10px)}
+    .topbar{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:20px 24px;border-bottom:2px solid var(--navy);background:#fff}
+    h1{font-size:clamp(1.45rem,4vw,2.55rem);line-height:1.02;margin:0;letter-spacing:-.045em}
+    .instruction{color:var(--muted);font-weight:700;margin:7px 0 0}
+    .stats{display:flex;gap:8px}
+    .pill{min-width:92px;text-align:center;border:2px solid var(--navy);border-radius:16px;padding:8px 12px;background:var(--cream)}
+    .pill small{display:block;color:var(--muted);font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
+    .pill b{font-size:1.3rem}
+    .progress{height:10px;background:#e4eaf2}.progress>i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--aqua),#20b9bc);transition:width .3s ease}
+    .play{padding:26px;display:grid;gap:22px}
+    .word-stage{min-height:185px;display:grid;place-items:center;position:relative}
+    .word-card{position:relative;z-index:2;min-width:min(360px,86vw);padding:25px 34px;border:3px solid var(--navy);border-radius:24px;background:var(--yellow);box-shadow:0 10px 0 var(--navy);font-weight:1000;font-size:clamp(2rem,6vw,3.5rem);letter-spacing:-.04em;text-align:center;cursor:grab;user-select:none;touch-action:none;transition:transform .2s,background .2s;animation:pop .25s ease both}
+    .word-card:focus-visible{outline:5px solid rgba(9,27,58,.22);outline-offset:5px}
+    .word-card.dragging{cursor:grabbing;transform:scale(1.04) rotate(-2deg)}
+    .word-card.wrong{animation:shake .35s;background:#ffc8bf}
+    .word-card.correct{background:var(--aqua);transform:scale(.85);opacity:0}
+    .hint{position:absolute;bottom:0;color:var(--muted);font-size:.9rem;font-weight:800}
+    .bins{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .bin{border:3px dashed var(--navy);border-radius:26px;min-height:180px;padding:22px;background:#fff;cursor:pointer;text-align:left;color:var(--ink);transition:.2s;position:relative;overflow:hidden}
+    .bin:hover,.bin:focus-visible,.bin.over{transform:translateY(-4px);box-shadow:0 10px 0 var(--navy);outline:0}
+    .bin[data-category="place"]{background:linear-gradient(145deg,#e8fcf9,#fff)}
+    .bin[data-category="transport"]{background:linear-gradient(145deg,#fff4dd,#fff)}
+    .bin-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .bin-title{font-size:clamp(1.15rem,3vw,1.65rem);font-weight:1000;letter-spacing:-.03em}
+    .bin-icon{font-size:2.2rem;filter:grayscale(1)}
+    .sorted{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px;align-content:flex-start}
+    .sorted span{font-size:.82rem;font-weight:900;padding:6px 9px;border:2px solid var(--navy);border-radius:999px;background:#fff;animation:pop .25s both}
+    .actions{display:flex;justify-content:center;gap:10px}
+    .action{border:2px solid var(--navy);border-radius:14px;padding:10px 16px;background:#fff;color:var(--ink);font-weight:900;box-shadow:0 4px 0 var(--navy);cursor:pointer}
+    .action:active{transform:translateY(3px);box-shadow:0 1px 0 var(--navy)}
+    .credit{display:flex;justify-content:center;margin-top:18px;font-size:.92rem;font-weight:900}.credit a{display:inline-flex;align-items:center;gap:8px;color:var(--ink);text-decoration:none;background:rgba(255,255,255,.8);border:2px solid var(--navy);border-radius:999px;padding:8px 14px;box-shadow:0 4px 0 rgba(9,27,58,.14)}.credit a:hover,.credit a:focus-visible{background:var(--yellow);outline:0;transform:translateY(-2px)}
+    .finish{position:fixed;inset:0;z-index:20;background:rgba(9,27,58,.68);display:none;place-items:center;padding:20px}
+    .finish.show{display:grid}
+    .finish-card{width:min(480px,100%);background:#fff;border:3px solid var(--navy);border-radius:30px;padding:34px;text-align:center;box-shadow:0 14px 0 var(--navy);animation:pop .3s both}
+    .finish-emoji{font-size:4.5rem}.finish h2{font-size:2.2rem;margin:8px 0}.finish p{color:var(--muted);font-weight:700;font-size:1.05rem}
+    .primary{border:2px solid var(--navy);border-radius:16px;padding:13px 22px;background:var(--yellow);color:var(--ink);font-weight:1000;font-size:1.05rem;box-shadow:0 5px 0 var(--navy);cursor:pointer}
+    @keyframes pop{from{opacity:0;transform:scale(.84)}to{opacity:1;transform:scale(1)}}
+    @keyframes shake{25%{transform:translateX(-12px) rotate(-2deg)}50%{transform:translateX(10px) rotate(2deg)}75%{transform:translateX(-6px)}}
+    @media(max-width:720px){.shell{width:min(100% - 20px,1180px);padding-top:14px}header{align-items:flex-start;flex-direction:column}.level-switch{align-self:stretch}.level-btn{flex:1}.topbar{grid-template-columns:1fr;padding:18px}.stats{width:100%}.pill{flex:1}.play{padding:18px}.bins{gap:10px}.bin{min-height:190px;padding:14px}.bin-top{align-items:flex-start;flex-direction:column-reverse}.bin-icon{font-size:1.8rem}.sorted span{font-size:.72rem;padding:5px 7px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><span class="brand-mark" aria-hidden="true">A↕</span><span>Word Sort</span></div>
+      <div class="level-switch" role="group" aria-label="Choose level">
+        <button class="level-btn active" data-level="easy">Easy · 20</button>
+        <button class="level-btn" data-level="hard">Hard · 36</button>
+      </div>
+    </header>
+    <section class="game" aria-label="Vocabulary sorting game">
+      <div class="topbar">
+        <div><h1>Town or transport?</h1><p class="instruction">Drag the word — or tap the correct box.</p></div>
+        <div class="stats"><div class="pill"><small>Sorted</small><b id="score">0 / 20</b></div><div class="pill"><small>Streak</small><b id="streak">0 🔥</b></div></div>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+      <div class="play">
+        <div class="word-stage"><div id="wordCard" class="word-card" draggable="true" tabindex="0" role="button" aria-label="Word to sort"></div><div class="hint">Choose a category ↓</div></div>
+        <div class="bins">
+          <button class="bin" data-category="place" aria-label="Put the word in Places in town"><span class="bin-top"><span class="bin-title">Places in town</span><span class="bin-icon" aria-hidden="true">⌂</span></span><span class="sorted" id="placeWords"></span></button>
+          <button class="bin" data-category="transport" aria-label="Put the word in Means of transport"><span class="bin-top"><span class="bin-title">Means of transport</span><span class="bin-icon" aria-hidden="true">➜</span></span><span class="sorted" id="transportWords"></span></button>
+        </div>
+        <div class="actions"><button class="action" id="shuffle">↻ Shuffle words</button><button class="action" id="restart">Start again</button></div>
+      </div>
+    </section>
+    <footer class="credit"><a href="https://vk.com/boxofideas59" target="_blank" rel="noopener noreferrer" aria-label="Box of Ideas on VK"><span aria-hidden="true">✦</span> Box of Ideas · vk.com/boxofideas59</a></footer>
+  </main>
+  <div class="finish" id="finish" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
+    <div class="finish-card"><div class="finish-emoji">🏆</div><h2 id="finishTitle">Brilliant!</h2><p id="finishText"></p><button class="primary" id="playAgain">Play again</button></div>
+  </div>
+  <script>
+    const easy={place:['bank','café','cinema','hospital','hotel','museum','park','restaurant','stadium','theatre'],transport:['bike','boat','bus','car','motorbike','plane','taxi','train','tram','underground']};
+    const extra={place:['school','shop','library','supermarket','airport','station','police station','swimming pool'],transport:['ship','scooter','helicopter','van','lorry','ferry','skateboard','bicycle']};
+    let level='easy',deck=[],current=null,done=0,streak=0,best=0,locked=false;
+    const card=document.querySelector('#wordCard'),score=document.querySelector('#score'),streakEl=document.querySelector('#streak'),progress=document.querySelector('#progress'),finish=document.querySelector('#finish');
+    const shuffleArray=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+    function words(){const data=level==='easy'?easy:{place:[...easy.place,...extra.place],transport:[...easy.transport,...extra.transport]};return Object.entries(data).flatMap(([category,list])=>list.map(word=>({word,category})));}
+    function start(){deck=shuffleArray(words());done=streak=best=0;locked=false;document.querySelectorAll('.sorted').forEach(x=>x.innerHTML='');finish.classList.remove('show');update();next();}
+    function update(){const total=words().length;score.textContent=`${done} / ${total}`;streakEl.textContent=`${streak} 🔥`;progress.style.width=`${done/total*100}%`;}
+    function next(){if(!deck.length){document.querySelector('#finishText').textContent=`You sorted all ${done} words. Best streak: ${best}!`;finish.classList.add('show');return;}current=deck.shift();card.textContent=current.word;card.className='word-card';card.focus({preventScroll:true});}
+    function choose(category){if(locked||!current)return;if(category===current.category){locked=true;done++;streak++;best=Math.max(best,streak);card.classList.add('correct');const chip=document.createElement('span');chip.textContent=current.word;document.querySelector(`#${category}Words`).append(chip);update();setTimeout(()=>{locked=false;next()},230)}else{streak=0;update();card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');}}
+    document.querySelectorAll('.bin').forEach(bin=>{bin.addEventListener('click',()=>choose(bin.dataset.category));bin.addEventListener('dragover',e=>{e.preventDefault();bin.classList.add('over')});bin.addEventListener('dragleave',()=>bin.classList.remove('over'));bin.addEventListener('drop',e=>{e.preventDefault();bin.classList.remove('over');choose(bin.dataset.category)})});
+    card.addEventListener('dragstart',()=>card.classList.add('dragging'));card.addEventListener('dragend',()=>card.classList.remove('dragging'));
+    card.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='1')choose('place');if(e.key==='ArrowRight'||e.key==='2')choose('transport')});
+    document.querySelectorAll('.level-btn').forEach(btn=>btn.addEventListener('click',()=>{level=btn.dataset.level;document.querySelectorAll('.level-btn').forEach(b=>b.classList.toggle('active',b===btn));start()}));
+    document.querySelector('#restart').addEventListener('click',start);document.querySelector('#playAgain').addEventListener('click',start);document.querySelector('#shuffle').addEventListener('click',()=>{deck=shuffleArray(deck);if(current)deck.push(current);next()});
+    start();
+  </script>
+</body>
+</html>
